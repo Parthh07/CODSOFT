@@ -1,11 +1,12 @@
 #include <iostream>
 using namespace std;
 
-char board[3][3] = { {'1','2','3'}, {'4','5','6'}, {'7','8','9'} };
+char board[3][3] = { {'1', '2', '3'}, {'4', '5', '6'}, {'7', '8', '9'} };
 char current_marker;
 int current_player;
 
 void drawBoard() {
+    system("cls"); 
     cout << " " << board[0][0] << " | " << board[0][1] << " | " << board[0][2] << endl;
     cout << "---|---|---" << endl;
     cout << " " << board[1][0] << " | " << board[1][1] << " | " << board[1][2] << endl;
@@ -31,18 +32,18 @@ bool placeMarker(int slot) {
     }
 }
 
-int winner() {
-    // Rows
+int checkWin() {
+    
     for (int i = 0; i < 3; i++) {
         if (board[i][0] == board[i][1] && board[i][1] == board[i][2])
             return current_player;
     }
-    // Columns
+    
     for (int i = 0; i < 3; i++) {
         if (board[0][i] == board[1][i] && board[1][i] == board[2][i])
             return current_player;
     }
-    // Diagonals
+    
     if (board[0][0] == board[1][1] && board[1][1] == board[2][2])
         return current_player;
     if (board[0][2] == board[1][1] && board[1][1] == board[2][0])
@@ -51,7 +52,17 @@ int winner() {
     return 0;
 }
 
-void swap_player_and_marker() {
+bool checkDraw() {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (board[i][j] != 'X' && board[i][j] != 'O')
+                return false;
+        }
+    }
+    return true;
+}
+
+void swapPlayerAndMarker() {
     if (current_marker == 'X')
         current_marker = 'O';
     else
@@ -63,8 +74,13 @@ void swap_player_and_marker() {
         current_player = 1;
 }
 
+void resetBoard() {
+    char resetBoard[3][3] = { {'1', '2', '3'}, {'4', '5', '6'}, {'7', '8', '9'} };
+    memcpy(board, resetBoard, 3 * 3 * sizeof(char));
+}
+
 void game() {
-    cout << "Player one, choose your marker: ";
+    cout << "Player one, choose your marker (X or O): ";
     char marker_p1;
     cin >> marker_p1;
 
@@ -73,48 +89,49 @@ void game() {
 
     drawBoard();
 
-    int player_won;
+    int player_won = 0;
 
-    for (int i = 0; i < 9; i++) {
+    while (true) {
         cout << "It's player " << current_player << "'s turn. Enter your slot: ";
         int slot;
         cin >> slot;
 
         if (slot < 1 || slot > 9) {
             cout << "Invalid slot! Try another slot!" << endl;
-            i--;
             continue;
         }
 
         if (!placeMarker(slot)) {
             cout << "Slot occupied! Try another slot!" << endl;
-            i--;
             continue;
         }
 
         drawBoard();
 
-        player_won = winner();
+        player_won = checkWin();
 
-        if (player_won == 1) {
-            cout << "Player one won! Congratulations!" << endl;
-            break;
-        }
-        if (player_won == 2) {
-            cout << "Player two won! Congratulations!" << endl;
+        if (player_won != 0) {
+            cout << "Player " << player_won << " won! Congratulations!" << endl;
             break;
         }
 
-        swap_player_and_marker();
+        if (checkDraw()) {
+            cout << "That's a draw game!" << endl;
+            break;
+        }
+
+        swapPlayerAndMarker();
     }
-
-    if (player_won == 0)
-        cout << "That's a tie game!" << endl;
 }
 
 int main() {
-    game();
+    char play_again;
+    do {
+        resetBoard();
+        game();
+        cout << "Do you want to play again? (y/n): ";
+        cin >> play_again;
+    } while (play_again == 'y');
+
     return 0;
 }
-
-
